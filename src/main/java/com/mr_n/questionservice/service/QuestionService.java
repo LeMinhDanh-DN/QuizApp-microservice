@@ -34,4 +34,14 @@ public class QuestionService {
     public Question addQuestion(Question question) {
         return repo.save(question);
     }
+
+    public List<Integer> getQuestionForQuiz(String category, Integer numQ) {
+        List<Integer> questionIds = repo.findRandomQuestionsByCategory(category, numQ);
+
+        if(questionIds .isEmpty()){
+            throw new ResourceNotFoundException("No questions found for category: " + category);
+        }
+
+        return questionIds;
+    }
 }

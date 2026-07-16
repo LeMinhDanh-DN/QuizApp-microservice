@@ -34,6 +34,14 @@ public class QuestionController {
     public ResponseEntity<Question> addQuestion(@RequestBody Question question) {
         return new ResponseEntity<>(questionService.addQuestion(question), HttpStatus.CREATED);
     }
+
+    @PostMapping("/generate")
+    public ResponseEntity<List<Integer>> getQuestionForQuiz (@RequestParam String category,
+                                                             @RequestParam Integer numQ){
+
+        List<Integer> questionIds = questionService.getQuestionForQuiz(category, numQ);
+        return new ResponseEntity<>(questionIds, HttpStatus.OK);
+    }
 }
 
 
