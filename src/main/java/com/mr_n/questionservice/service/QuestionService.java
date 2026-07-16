@@ -1,5 +1,6 @@
 package com.mr_n.questionservice.service;
 
+import com.mr_n.questionservice.exception.ResourceNotFoundException;
 import com.mr_n.questionservice.model.Question;
 import com.mr_n.questionservice.repo.QuestionRepo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,11 +14,21 @@ public class QuestionService {
     private QuestionRepo repo;
 
     public List<com.mr_n.questionservice.model.Question> getAllQuestions() {
-        return repo.findAll();
+        List<Question> questions = repo.findAll();
+
+        if (questions.isEmpty()) {
+            throw new ResourceNotFoundException("No questions found in database");
+        }
+        return questions;
     }
 
     public List<Question> getQuestionsByCategory(String type) {
-        return repo.findByCategory(type);
+        List<Question> questions = repo.findByCategory(type);
+
+        if (questions.isEmpty()) {
+            throw new ResourceNotFoundException("No questions found for category: " + type);
+        }
+        return questions;
     }
 
     public Question addQuestion(Question question) {

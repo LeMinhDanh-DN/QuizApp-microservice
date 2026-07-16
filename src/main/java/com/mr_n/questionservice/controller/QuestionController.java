@@ -21,18 +21,12 @@ public class QuestionController {
     @GetMapping("/all")
     public ResponseEntity<List<Question>> getAllQuestions() {
         List<Question> questions = questionService.getAllQuestions();
-        if (questions.isEmpty()) {
-            throw new ResourceNotFoundException("No questions found in database");
-        }
         return new ResponseEntity<>(questions, HttpStatus.OK);
     }
 
     @GetMapping("/category/{type}")
     public ResponseEntity<List<Question>> getQuestionsByCategory(@PathVariable String type) {
         List<Question> questions = questionService.getQuestionsByCategory(type);
-        if (questions.isEmpty()) {
-            throw new ResourceNotFoundException("No questions found for category: " + type);
-        }
         return new ResponseEntity<>(questions, HttpStatus.OK);
     }
 
