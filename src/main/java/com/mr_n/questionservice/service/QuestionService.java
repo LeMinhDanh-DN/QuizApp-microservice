@@ -3,6 +3,7 @@ package com.mr_n.questionservice.service;
 import com.mr_n.questionservice.exception.ResourceNotFoundException;
 import com.mr_n.questionservice.model.Question;
 import com.mr_n.questionservice.model.QuestionWrapper;
+import com.mr_n.questionservice.model.Response;
 import com.mr_n.questionservice.repo.QuestionRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -68,5 +69,22 @@ public class QuestionService {
         }
 
         return wrappers;
+    }
+
+    public Integer calculateScore(List<Response> responses) {
+
+        int score = 0;
+
+        for (Response res : responses) {
+            Question question = repo.findById(res.getId()).orElseThrow(() -> new RuntimeException("Question not found!"));
+
+            //trim() reduce white space
+            //equalsIgnoreCase -> case-insensitive
+            if (question != null && res.getAnswer().trim().equalsIgnoreCase(question.getAnswer().trim())) {
+                score++;
+            }
+        }
+
+        return score;
     }
 }

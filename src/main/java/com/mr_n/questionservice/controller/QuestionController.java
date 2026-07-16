@@ -3,6 +3,7 @@ package com.mr_n.questionservice.controller;
 import com.mr_n.questionservice.exception.ResourceNotFoundException;
 import com.mr_n.questionservice.model.Question;
 import com.mr_n.questionservice.model.QuestionWrapper;
+import com.mr_n.questionservice.model.Response;
 import com.mr_n.questionservice.service.QuestionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -49,6 +50,12 @@ public class QuestionController {
 
         List<QuestionWrapper> questions = questionService.getQuestionsByIds(questionIds);
         return new ResponseEntity<>(questions, HttpStatus.OK);
+    }
+
+    @PostMapping("getScore")
+    public ResponseEntity<Integer> getScore(@RequestBody List<Response> responses){
+        Integer score = questionService.calculateScore(responses);
+        return new ResponseEntity<>(score, HttpStatus.OK);
     }
 }
 
