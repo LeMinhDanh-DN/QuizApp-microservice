@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/questions")
+@RequestMapping("/question")
 public class QuestionController {
 
     @Autowired
@@ -45,7 +45,7 @@ public class QuestionController {
         return new ResponseEntity<>(questionIds, HttpStatus.OK);
     }
 
-    @PostMapping("getQuestion")
+    @PostMapping("getQuestions")
     public ResponseEntity<List<QuestionWrapper>> getQuestionsByIds(@RequestBody List<Integer> questionIds){
 
         List<QuestionWrapper> questions = questionService.getQuestionsByIds(questionIds);
