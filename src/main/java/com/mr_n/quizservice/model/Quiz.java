@@ -18,5 +18,6 @@ public class Quiz {
     private String title;
     private String category;
 
+    @ElementCollection
     private List<Integer> questionIds;
 }
