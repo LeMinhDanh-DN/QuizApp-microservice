@@ -1,6 +1,7 @@
 package com.mr_n.quizservice.service;
 import com.mr_n.quizservice.exception.ResourceNotFoundException;
 import com.mr_n.quizservice.feign.QuizInterface;
+import com.mr_n.quizservice.model.QuestionWrapper;
 import com.mr_n.quizservice.model.Quiz;
 import com.mr_n.quizservice.repo.QuizRepo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,5 +37,17 @@ public class QuizService {
         return quizDao.save(quiz);
     }
 
+    public List<QuestionWrapper> getQuizQuestions(Integer id) {
+        Quiz quiz = quizDao.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Quiz not found with id: " + id));
+
+        List<QuestionWrapper> questions = quizInterface.getQuestionsByIds(quiz.getQuestionIds()).getBody();
+
+        if (questions == null || questions.isEmpty()) {
+            throw new ResourceNotFoundException("No questions found for the provided IDs");
+        }
+
+        return questions;
+    }
 }
 
