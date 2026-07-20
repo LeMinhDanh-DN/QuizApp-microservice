@@ -1,6 +1,7 @@
 package com.mr_n.quizservice.controller;
 
 import com.mr_n.quizservice.model.QuestionWrapper;
+import com.mr_n.quizservice.model.Response;
 import com.mr_n.quizservice.model.dto.QuizDto;
 import com.mr_n.quizservice.model.Quiz;
 import com.mr_n.quizservice.service.QuizService;
@@ -26,5 +27,10 @@ public class QuizController {
     @GetMapping("/get/{id}")
     public ResponseEntity<List<QuestionWrapper>> getQuizById(@PathVariable Integer id) {
         return new ResponseEntity<>(quizService.getQuizQuestions(id),HttpStatus.OK);
+    }
+
+    @PostMapping("/submit")
+    public ResponseEntity<Integer> submitQuiz( @RequestBody List<Response> responses) {
+        return new ResponseEntity<>(quizService.getResult(responses), HttpStatus.OK);
     }
 }
