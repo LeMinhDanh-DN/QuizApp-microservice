@@ -1,6 +1,8 @@
 package com.mr_n.quizservice.service;
+import com.mr_n.quizservice.event.QuizSubmittedEvent;
 import com.mr_n.quizservice.exception.ResourceNotFoundException;
 import com.mr_n.quizservice.feign.QuizInterface;
+import com.mr_n.quizservice.kafka.QuizEventProducer;
 import com.mr_n.quizservice.model.QuestionWrapper;
 import com.mr_n.quizservice.model.Quiz;
 import com.mr_n.quizservice.model.Response;
@@ -22,11 +24,14 @@ public class QuizService {
     @Autowired
     private QuizInterface quizInterface;
 
+    @Autowired
+    private QuizEventProducer quizEventProducer;
+
     public Quiz createQuiz(String category, int numQ, String title) {
 
         List<Integer> questionIds = quizInterface.getQuestionForQuiz(category, numQ).getBody();
 
-        if (questionIds.isEmpty()) {
+        if (questionIds == null || questionIds.isEmpty()) {
             throw new ResourceNotFoundException("No questions found for category: " + category);
         }
 
@@ -54,5 +59,11 @@ public class QuizService {
     public Integer getResult (List<Response> res){
             return quizInterface.getScore(res).getBody();
     }
+
+    public void submitQuizAsync(Integer quizId, List<Response> res) {
+        QuizSubmittedEvent event = new QuizSubmittedEvent(quizId, res);
+        quizEventProducer.sendQuizSubmission(event);
+    }
 }
+
 

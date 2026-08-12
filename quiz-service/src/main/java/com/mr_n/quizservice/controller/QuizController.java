@@ -21,16 +21,24 @@ public class QuizController {
 
     @PostMapping("/create")
     public ResponseEntity<Quiz> createQuiz(@RequestBody QuizDto quizDto) {
-        return new ResponseEntity<>(quizService.createQuiz(quizDto.category(), quizDto.numQ(), quizDto.title()), HttpStatus.CREATED);
+        return new ResponseEntity<>(quizService.createQuiz(quizDto.category(), quizDto.numQ(), quizDto.title()),
+                HttpStatus.CREATED);
     }
 
     @GetMapping("/get/{id}")
     public ResponseEntity<List<QuestionWrapper>> getQuizById(@PathVariable Integer id) {
-        return new ResponseEntity<>(quizService.getQuizQuestions(id),HttpStatus.OK);
+        return new ResponseEntity<>(quizService.getQuizQuestions(id), HttpStatus.OK);
     }
 
     @PostMapping("/submit")
-    public ResponseEntity<Integer> submitQuiz( @RequestBody List<Response> responses) {
+    public ResponseEntity<Integer> submitQuiz(@RequestBody List<Response> responses) {
         return new ResponseEntity<>(quizService.getResult(responses), HttpStatus.OK);
+    }
+
+    @PostMapping("/submit-async/{quizId}")
+    public ResponseEntity<String> submitQuizAsync(@PathVariable Integer quizId, @RequestBody List<Response> responses) {
+        quizService.submitQuizAsync(quizId, responses);
+        return new ResponseEntity<>("Quiz submission received and is being processed asynchronously!",
+                HttpStatus.ACCEPTED);
     }
 }
