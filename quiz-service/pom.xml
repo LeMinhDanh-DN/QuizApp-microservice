@@ -44,6 +44,8 @@
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-starter-model-postgresml-embedding</artifactId>
         </dependency>
+
+        <!--Microservice Communication-->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
@@ -52,6 +54,13 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-openfeign</artifactId>
         </dependency>
+
+        <!-- Spring Kafka Support-->
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
+        </dependency>
+
 
         <dependency>
             <groupId>org.projectlombok</groupId>
