@@ -1,6 +1,8 @@
 package com.mr_n.questionservice.service;
 
+import com.mr_n.questionservice.event.QuizResultEvent;
 import com.mr_n.questionservice.exception.ResourceNotFoundException;
+import com.mr_n.questionservice.kafka.QuizResultEventProducer;
 import com.mr_n.questionservice.model.Question;
 import com.mr_n.questionservice.model.QuestionWrapper;
 import com.mr_n.questionservice.model.Response;
@@ -15,6 +17,9 @@ import java.util.List;
 public class QuestionService {
     @Autowired
     private QuestionRepo repo;
+
+    @Autowired
+    private QuizResultEventProducer quizEventProducer;
 
     public List<com.mr_n.questionservice.model.Question> getAllQuestions() {
         List<Question> questions = repo.findAll();
@@ -41,7 +46,7 @@ public class QuestionService {
     public List<Integer> getQuestionForQuiz(String category, Integer numQ) {
         List<Integer> questionIds = repo.findRandomQuestionsByCategory(category, numQ);
 
-        if(questionIds .isEmpty()){
+        if (questionIds.isEmpty()) {
             throw new ResourceNotFoundException("No questions found for category: " + category);
         }
 
@@ -51,7 +56,7 @@ public class QuestionService {
     public List<QuestionWrapper> getQuestionsByIds(List<Integer> questionIds) {
         List<Question> questions = repo.findAllById(questionIds);
 
-        if(questions.isEmpty()){
+        if (questions.isEmpty()) {
             throw new ResourceNotFoundException("No questions found for the provided IDs");
         }
 
@@ -63,8 +68,7 @@ public class QuestionService {
                     q.getOp1(),
                     q.getOp2(),
                     q.getOp3(),
-                    q.getOp4()
-            );
+                    q.getOp4());
             wrappers.add(wrapper);
         }
 
@@ -76,15 +80,21 @@ public class QuestionService {
         int score = 0;
 
         for (Response res : responses) {
-            Question question = repo.findById(res.getId()).orElseThrow(() -> new RuntimeException("Question not found!"));
+            Question question = repo.findById(res.getId())
+                    .orElseThrow(() -> new RuntimeException("Question not found!"));
 
-            //trim() reduce white space
-            //equalsIgnoreCase -> case-insensitive
+            // trim() reduce white space
+            // equalsIgnoreCase -> case-insensitive
             if (question != null && res.getAnswer().trim().equalsIgnoreCase(question.getAnswer().trim())) {
                 score++;
             }
         }
 
         return score;
+    }
+
+    public void responseQuizScore(int quizId, int score) {
+        QuizResultEvent event = new QuizResultEvent(quizId, score);
+        quizEventProducer.sendQuizResult(event);
     }
 }

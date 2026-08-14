@@ -19,5 +19,9 @@ public class QuizEventConsumer {
         Integer score = questionService.calculateScore(event.getResponses());
 
         System.out.println("Calculated Score for Quiz ID " + event.getQuizId() + " is: " + score);
+
+        questionService.responseQuizScore(event.getQuizId(), score);
+
+        System.out.println("Result was sent sucessfully!");
     }
 }
