@@ -1,10 +1,9 @@
 package com.mr_n.quizservice.kafka;
 
 import org.springframework.kafka.annotation.KafkaListener;
-
-import com.mr_n.quizservice.event.QuizResultEvent;
-
 import org.springframework.stereotype.Service;
+
+import com.mr_n.quizservice.model.event.QuizResultEvent;
 
 @Service
 public class QuizResultEventConsumer {

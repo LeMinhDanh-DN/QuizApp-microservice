@@ -1,11 +1,12 @@
 package com.mr_n.quizservice.service;
-import com.mr_n.quizservice.event.QuizSubmittedEvent;
+
 import com.mr_n.quizservice.exception.ResourceNotFoundException;
 import com.mr_n.quizservice.feign.QuizInterface;
 import com.mr_n.quizservice.kafka.QuizEventProducer;
 import com.mr_n.quizservice.model.QuestionWrapper;
 import com.mr_n.quizservice.model.Quiz;
 import com.mr_n.quizservice.model.Response;
+import com.mr_n.quizservice.model.event.QuizSubmittedEvent;
 import com.mr_n.quizservice.repo.QuizRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -56,8 +57,8 @@ public class QuizService {
         return questions;
     }
 
-    public Integer getResult (List<Response> res){
-            return quizInterface.getScore(res).getBody();
+    public Integer getResult(List<Response> res) {
+        return quizInterface.getScore(res).getBody();
     }
 
     public void submitQuizAsync(Integer quizId, List<Response> res) {
@@ -65,5 +66,3 @@ public class QuizService {
         quizEventProducer.sendQuizSubmission(event);
     }
 }
-
-

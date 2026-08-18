@@ -1,4 +1,4 @@
-package com.mr_n.quizservice.event;
+package com.mr_n.quizservice.model.event;
 
 import com.mr_n.quizservice.model.Response;
 import lombok.AllArgsConstructor;
