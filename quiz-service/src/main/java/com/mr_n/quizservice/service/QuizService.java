@@ -1,7 +1,7 @@
 package com.mr_n.quizservice.service;
 
 import com.mr_n.quizservice.exception.ResourceNotFoundException;
-import com.mr_n.quizservice.feign.QuizInterface;
+import com.mr_n.quizservice.feign.QuestionClient;
 import com.mr_n.quizservice.kafka.QuizEventProducer;
 import com.mr_n.quizservice.model.QuestionWrapper;
 import com.mr_n.quizservice.model.Quiz;
@@ -23,14 +23,14 @@ public class QuizService {
     private QuizRepo quizDao;
 
     @Autowired
-    private QuizInterface quizInterface;
+    private QuestionClient questionClient;
 
     @Autowired
     private QuizEventProducer quizEventProducer;
 
     public Quiz createQuiz(String category, int numQ, String title) {
 
-        List<Integer> questionIds = quizInterface.getQuestionForQuiz(category, numQ).getBody();
+        List<Integer> questionIds = questionClient.getQuestionForQuiz(category, numQ).getBody();
 
         if (questionIds == null || questionIds.isEmpty()) {
             throw new ResourceNotFoundException("No questions found for category: " + category);
@@ -48,7 +48,7 @@ public class QuizService {
         Quiz quiz = quizDao.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Quiz not found with id: " + id));
 
-        List<QuestionWrapper> questions = quizInterface.getQuestionsByIds(quiz.getQuestionIds()).getBody();
+        List<QuestionWrapper> questions = questionClient.getQuestionsByIds(quiz.getQuestionIds()).getBody();
 
         if (questions == null || questions.isEmpty()) {
             throw new ResourceNotFoundException("No questions found for the provided IDs");
@@ -58,7 +58,7 @@ public class QuizService {
     }
 
     public Integer getResult(List<Response> res) {
-        return quizInterface.getScore(res).getBody();
+        return questionClient.getScore(res).getBody();
     }
 
     public void submitQuizAsync(Integer quizId, List<Response> res) {
