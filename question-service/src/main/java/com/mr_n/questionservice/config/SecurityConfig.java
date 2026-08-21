@@ -24,7 +24,7 @@ public class SecurityConfig {
                         .requestMatchers("/question/all").hasRole("ADMIN")
                         .requestMatchers("/question/add").hasRole("ADMIN")
                         .requestMatchers("/question/category/{type}").hasRole("ADMIN")
-                        .anyRequest().authenticated())
+                        .anyRequest().permitAll())
                 .addFilterBefore(headerAuthenFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
