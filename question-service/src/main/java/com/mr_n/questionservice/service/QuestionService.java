@@ -10,6 +10,7 @@ import com.mr_n.questionservice.repo.QuestionRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -93,8 +94,15 @@ public class QuestionService {
         return score;
     }
 
-    public void responseQuizScore(int quizId, int score) {
-        QuizResultEvent event = new QuizResultEvent(quizId, score);
+    public void responseQuizScore(int quizId, Integer userId, int score, Integer totalQuestions,
+            LocalDateTime submittedAt) {
+        QuizResultEvent event = QuizResultEvent.builder()
+                .quizId(quizId)
+                .userId(userId)
+                .score(score)
+                .totalQuestions(totalQuestions)
+                .submittedAt(submittedAt)
+                .build();
         quizEventProducer.sendQuizResult(event);
     }
 }

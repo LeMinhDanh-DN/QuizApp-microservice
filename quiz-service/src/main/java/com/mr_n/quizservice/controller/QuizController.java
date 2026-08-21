@@ -1,9 +1,10 @@
 package com.mr_n.quizservice.controller;
 
 import com.mr_n.quizservice.model.QuestionWrapper;
+import com.mr_n.quizservice.model.Quiz;
+import com.mr_n.quizservice.model.QuizResult;
 import com.mr_n.quizservice.model.Response;
 import com.mr_n.quizservice.model.dto.QuizDto;
-import com.mr_n.quizservice.model.Quiz;
 import com.mr_n.quizservice.service.QuizService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -36,9 +37,27 @@ public class QuizController {
     }
 
     @PostMapping("/submit-async/{quizId}")
-    public ResponseEntity<String> submitQuizAsync(@PathVariable Integer quizId, @RequestBody List<Response> responses) {
-        quizService.submitQuizAsync(quizId, responses);
-        return new ResponseEntity<>("Quiz submission received and is being processed asynchronously!",
+    public ResponseEntity<String> submitQuizAsync(@PathVariable Integer quizId, @RequestBody List<Response> responses,
+            @RequestHeader("X-User-Id") Integer userId) {
+
+        quizService.submitQuizAsync(quizId, responses, userId);
+        return new ResponseEntity<>("Quiz submission received and is being processed!",
                 HttpStatus.ACCEPTED);
+    }
+
+    @GetMapping("/result/my-history")
+    public ResponseEntity<List<QuizResult>> getMyHistory(@RequestHeader("X-User-Id") Long userId) {
+        return ResponseEntity.ok(quizService.getUserQuizHistory(userId));
+    }
+
+    @GetMapping("/result/user/{userId}")
+    public ResponseEntity<List<QuizResult>> getUserHistory(@PathVariable Long userId) {
+        return ResponseEntity.ok(quizService.getUserQuizHistory(userId));
+    }
+
+    @GetMapping("/result/quiz/{quizId}")
+    public ResponseEntity<QuizResult> getQuizResultForUser(@PathVariable Integer quizId,
+            @RequestHeader("X-User-Id") Long userId) {
+        return ResponseEntity.ok(quizService.getQuizResultForUser(quizId, userId));
     }
 }

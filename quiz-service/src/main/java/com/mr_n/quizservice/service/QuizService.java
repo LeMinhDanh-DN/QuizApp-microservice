@@ -5,22 +5,26 @@ import com.mr_n.quizservice.feign.QuestionClient;
 import com.mr_n.quizservice.kafka.QuizEventProducer;
 import com.mr_n.quizservice.model.QuestionWrapper;
 import com.mr_n.quizservice.model.Quiz;
+import com.mr_n.quizservice.model.QuizResult;
 import com.mr_n.quizservice.model.Response;
 import com.mr_n.quizservice.model.event.QuizSubmittedEvent;
 import com.mr_n.quizservice.repo.QuizRepo;
+import com.mr_n.quizservice.repo.QuizResultRepo;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class QuizService {
 
     @Autowired
-    private QuizRepo quizDao;
+    private QuizRepo quizRepo;
+
+    @Autowired
+    private QuizResultRepo quizResultRepo;
 
     @Autowired
     private QuestionClient questionClient;
@@ -41,11 +45,11 @@ public class QuizService {
         quiz.setCategory(category);
         quiz.setQuestionIds(questionIds);
 
-        return quizDao.save(quiz);
+        return quizRepo.save(quiz);
     }
 
     public List<QuestionWrapper> getQuizQuestions(Integer id) {
-        Quiz quiz = quizDao.findById(id)
+        Quiz quiz = quizRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Quiz not found with id: " + id));
 
         List<QuestionWrapper> questions = questionClient.getQuestionsByIds(quiz.getQuestionIds()).getBody();
@@ -61,8 +65,18 @@ public class QuizService {
         return questionClient.getScore(res).getBody();
     }
 
-    public void submitQuizAsync(Integer quizId, List<Response> res) {
-        QuizSubmittedEvent event = new QuizSubmittedEvent(quizId, res);
+    public void submitQuizAsync(Integer quizId, List<Response> res, Integer userId) {
+        QuizSubmittedEvent event = new QuizSubmittedEvent(quizId, res, userId, res.size(), LocalDateTime.now());
         quizEventProducer.sendQuizSubmission(event);
+    }
+
+    public List<QuizResult> getUserQuizHistory(Long userId) {
+        return quizResultRepo.findByUserIdOrderBySubmittedAtDesc(userId);
+    }
+
+    public QuizResult getQuizResultForUser(Integer quizId, Long userId) {
+        return quizResultRepo.findByQuizIdAndUserId(quizId, userId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "No result found for quizId: " + quizId + " and userId: " + userId));
     }
 }

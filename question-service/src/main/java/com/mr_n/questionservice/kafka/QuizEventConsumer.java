@@ -14,14 +14,14 @@ public class QuizEventConsumer {
 
     @KafkaListener(topics = "quiz-submissions-topic", groupId = "question-group")
     public void consumeQuizSubmission(QuizSubmittedEvent event) {
-        System.out.println("Received Quiz Submission Event for Quiz ID: " + event.getQuizId());
+        System.out.println("Received Quiz Submission Event for Quiz ID: " + event.getQuizId() + " from User ID: "
+                + event.getUserId());
 
         Integer score = questionService.calculateScore(event.getResponses());
 
-        System.out.println("Calculated Score for Quiz ID " + event.getQuizId() + " is: " + score);
+        questionService.responseQuizScore(event.getQuizId(), event.getUserId(), score, event.getTotalQuestions(),
+                event.getSubmittedAt());
 
-        questionService.responseQuizScore(event.getQuizId(), score);
-
-        System.out.println("Result was sent sucessfully!");
+        System.out.println("Result was sent successfully!");
     }
 }

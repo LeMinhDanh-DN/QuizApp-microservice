@@ -15,7 +15,6 @@ public class QuizEventProducer {
 
     public void sendQuizSubmission(QuizSubmittedEvent event) {
         kafkaTemplate.send(KafkaTopicConfig.QUIZ_SUBMISSIONS_TOPIC, String.valueOf(event.getQuizId()), event);
-        System.out.println("Sent QuizSubmittedEvent to Kafka topic: " + KafkaTopicConfig.QUIZ_SUBMISSIONS_TOPIC
-                + " for Quiz ID: " + event.getQuizId());
     }
+
 }
