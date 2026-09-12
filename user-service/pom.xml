@@ -15,7 +15,7 @@
     <description>User Service for QuizApp</description>
 
     <properties>
-        <java.version>25</java.version>
+        <java.version>17</java.version>
         <spring-cloud.version>2025.1.2</spring-cloud.version>
     </properties>
 

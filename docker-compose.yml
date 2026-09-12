@@ -15,6 +15,7 @@ services:
     container_name: quizapp-kafka
     ports:
       - "19092:19092"
+      - "9092:9092"
     depends_on:
       - zookeeper
     environment:
@@ -34,3 +35,116 @@ services:
       POSTGRES_DB: user_db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 123456
+    volumes:
+      - ./db-schemas/init-dbs.sql:/docker-entrypoint-initdb.d/init-dbs.sql
+
+  service-registry:
+    build:
+      context: ./service-registry
+      dockerfile: Dockerfile
+    container_name: quizapp-service-registry
+    ports:
+      - "8761:8761"
+    environment:
+      - EUREKA_HOSTNAME=service-registry
+      - EUREKA_CLIENT_FETCH_REGISTRY=false
+      - EUREKA_CLIENT_REGISTER_WITH_EUREKA=false
+
+  user-service:
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+    container_name: quizapp-user-service
+    ports:
+      - "8086:8086"
+    depends_on:
+      - service-registry
+      - postgres-user-db
+    environment:
+      - EUREKA_URL=http://service-registry:8761/eureka/
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-registry:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-user-db:5432/user_db
+      - DB_URL=jdbc:postgresql://postgres-user-db:5432/user_db
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=123456
+
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    container_name: quizapp-auth-service
+    ports:
+      - "8085:8085"
+    depends_on:
+      - service-registry
+      - user-service
+      - postgres-user-db
+    environment:
+      - EUREKA_URL=http://service-registry:8761/eureka/
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-registry:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-user-db:5432/user_db
+      - DB_URL=jdbc:postgresql://postgres-user-db:5432/user_db
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=123456
+
+  question-service:
+    build:
+      context: ./question-service
+      dockerfile: Dockerfile
+    container_name: quizapp-question-service
+    ports:
+      - "8084:8084"
+    depends_on:
+      - service-registry
+      - postgres-user-db
+      - kafka
+    environment:
+      - EUREKA_URL=http://service-registry:8761/eureka/
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-registry:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-user-db:5432/questiondb
+      - DB_URL=jdbc:postgresql://postgres-user-db:5432/questiondb
+      - DB_NAME=questiondb
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=123456
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - KAFKA_SERVERS=kafka:9092
+
+  quiz-service:
+    build:
+      context: ./quiz-service
+      dockerfile: Dockerfile
+    container_name: quizapp-quiz-service
+    ports:
+      - "8083:8083"
+    depends_on:
+      - service-registry
+      - question-service
+      - postgres-user-db
+      - kafka
+    environment:
+      - EUREKA_URL=http://service-registry:8761/eureka/
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-registry:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-user-db:5432/quizdb
+      - DB_URL=jdbc:postgresql://postgres-user-db:5432/quizdb
+      - DB_NAME=quizdb
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=123456
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - KAFKA_SERVERS=kafka:9092
+
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name: quizapp-api-gateway
+    ports:
+      - "8765:8765"
+    depends_on:
+      - service-registry
+      - auth-service
+      - user-service
+      - question-service
+      - quiz-service
+    environment:
+      - EUREKA_URL=http://service-registry:8761/eureka/
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-registry:8761/eureka/
